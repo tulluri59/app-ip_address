@@ -7,11 +7,11 @@
 const IPCIDR = require('ip-cidr');
 
 /**
- * Calculate and return the first host IP address from a CIDR subnet in IPv6 and IPv4 forms.
+ * Calculate and return the first host IP address from a CIDR subnet.
  * @param {string} cidrStr - The IPv4 subnet expressed
  *                 in CIDR format.
  * @param {callback} callback - A callback function.
- * @return {string} (firstIpAddress) - An object containing an IPv6 and IPv4 address.
+ * @return {string} (firstIpAddress) - An IPv4 address.
  */
 function getFirstIpAddress(cidrStr, callback) {
 
@@ -37,15 +37,17 @@ function getFirstIpAddress(cidrStr, callback) {
     // If the passed CIDR is valid, call the object's toArray() method.
     // Notice the destructering assignment syntax to get the value of the first array's element.
     [firstIpAddress] = cidr.toArray(options);
-    IPv6Address = getIpv4MappedIpv6Address(firstIpAddress)
   }
   // Call the passed callback function.
   // Node.js convention is to pass error data as the first argument to a callback.
   // The IAP convention is to pass returned data as the first argument and error
   // data as the second argument to the callback function.
-  return callback({ipv4: firstIpAddress, ipv6: IPv6Address}, callbackError);
+  return callback(firstIpAddress, callbackError);
 }
-
+/*
+  This section is used to test function and log any errors.
+  We will make several positive and negative tests.
+*/
 /**
  * Calculates an IPv4-mapped IPv6 address.
  * @param {string} ipv4 - An IPv4 address in dotted-quad format.
@@ -95,10 +97,6 @@ function getIpv4MappedIpv6Address(ipv4) {
   return ipv6Address;
 }
 
-/*
-  This section is used to test function and log any errors.
-  We will make several positive and negative tests.
-*/
 function main() {
   // Create some test data for getFirstIpAddress(), both valid and invalid.
   let sampleCidrs = ['172.16.10.0/24', '172.16.10.0 255.255.255.0', '172.16.10.128/25', '192.168.1.216/30'];
@@ -118,7 +116,7 @@ function main() {
       if (error) {
         console.error(`  Error returned from GET request: ${error}`);
       }
-        console.log(`  Response returned from GET request: ${JSON.stringify(data)}`);
+      console.log(`  Response returned from GET request: ${data}`);
     });
   }
   // Iterate over sampleIpv4s and pass the element's value to getIpv4MappedIpv6Address().
